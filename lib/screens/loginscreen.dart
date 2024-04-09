@@ -1,8 +1,6 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'package:Gestion_de_Finanzas/screens/homescreen.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:Gestion_de_Finanzas/main.dart';
 
 final controlerP = TextEditingController();
@@ -96,20 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                /* SizedBox(
-                  width: MediaQuery.of(context).size.width / 1.20,
-                  child: TextField(
-                    controller: controlerU,
-                    decoration: InputDecoration(
-                        labelText: "Escribe tu USUARIO...",
-                        labelStyle: const TextStyle(color: Color(0xFFF39422)),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(90),
-                            borderSide: const BorderSide(
-                                color: Color(0xFF293A80),
-                                style: BorderStyle.solid))),
-                  ),
-                ), */
                 const SizedBox(
                   height: 20,
                 ),
@@ -137,11 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   onPressed: () {
                     insertar(controlerC.text, controlerP.text, context);
-                    //verificar(context);
-
-                    /* Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const HomeScreen(),
-                    )); */
                   },
                   style: ButtonStyle(
                       backgroundColor: MaterialStateColor.resolveWith(

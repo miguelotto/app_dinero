@@ -1,15 +1,13 @@
 import 'package:Gestion_de_Finanzas/main.dart';
 import 'package:Gestion_de_Finanzas/screens/accounts.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:Gestion_de_Finanzas/screens/screen_ahorro.dart';
 import 'package:Gestion_de_Finanzas/screens/screen_corriente.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:io';
+// ignore: depend_on_referenced_packages
 import 'package:path_provider/path_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -36,22 +34,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final session = Supabase.instance.client.auth.currentSession;
+    final user = Supabase.instance.client.auth.currentUser;
+
     DateTime now = DateTime.now();
     String formatDate;
     String fromattedDate = "${now.day}/${now.month}/${now.year}";
+    // ignore: non_constant_identifier_names
     String Selecteditem = "";
+    // ignore: non_constant_identifier_names
     int Selectedindex = 0;
     DateTime _fecha = DateTime.now();
+    // ignore: non_constant_identifier_names
     TextEditingController Fecha = TextEditingController();
     TextEditingController montoC = TextEditingController();
     TextEditingController conceptoC = TextEditingController();
-    final _stream = supabase
-        .from('transacciones')
-        .stream(primaryKey: ['id'])
-        .eq('id_user', session!.user!.id)
-        .order('created_at', ascending: false);
 
-    Future<void> _seleccionarFecha(BuildContext context) async {
+    Future<void> seleccionarFecha(BuildContext context) async {
       final DateTime? pick = await showDatePicker(
           context: context,
           initialDate: _fecha,
@@ -66,6 +65,14 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
+    @override
+    void initState() {
+      super.initState();
+      setState(() {});
+    }
+
+    final _stream;
+
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -73,42 +80,33 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         floatingActionButton: SpeedDial(
           spaceBetweenChildren: 12,
-          overlayColor: Colors.black,
-          overlayOpacity: 0.4,
+          overlayColor: Colors.white,
+          overlayOpacity: 0.7,
           animatedIcon: AnimatedIcons.menu_home,
           foregroundColor: letras,
           backgroundColor: fondo2,
           children: [
             SpeedDialChild(
               backgroundColor: fondo2,
-              child: Icon(
+              child: const Icon(
                 Icons.money_off,
                 color: Colors.red,
               ),
               label: 'Egreso',
-              labelStyle: TextStyle(color: letras, fontFamily: fuente),
-              labelBackgroundColor: fondo2,
-              onTap: () {/* Acción para el primer botón */},
-            ),
-            SpeedDialChild(
-              backgroundColor: fondo2,
-              child: Icon(
-                Icons.monetization_on_outlined,
-                color: Colors.green,
-              ),
-              label: 'Ingreso',
-              labelStyle: TextStyle(color: letras, fontFamily: fuente),
+              labelStyle: const TextStyle(color: letras, fontFamily: fuente),
               labelBackgroundColor: fondo2,
               onTap: () {
                 showDialog(
+                  barrierColor: fondo,
+                  barrierDismissible: false,
                   context: context,
                   builder: (context) {
                     return AlertDialog(
                         titlePadding: EdgeInsets.only(
                             left: MediaQuery.of(context).size.width / 3.20,
                             top: MediaQuery.of(context).size.height / 22),
-                        title: Text(
-                          "Ingreso",
+                        title: const Text(
+                          "Egreso",
                           style: TextStyle(fontSize: 22, fontFamily: fuente),
                         ),
                         backgroundColor: fondo,
@@ -124,16 +122,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               Form(
                                   child: TextFormField(
                                 controller: montoC,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                     icon: Icon(Icons.monetization_on),
                                     labelText: "Monto",
                                     labelStyle: TextStyle(
                                         fontFamily: fuente, fontSize: 18)),
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(),
+                                /* inputFormatters: [
                                   FilteringTextInputFormatter.allow(
                                       RegExp("[0-9]"))
-                                ],
+                                ], */
                               )),
                               DropdownButtonFormField<String>(
                                 value: Selecteditem,
@@ -167,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Text(value),
                                   );
                                 }).toList(),
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                     icon: Icon(
                                         Icons.account_balance_wallet_outlined),
                                     labelText: "Seleccione la cuenta",
@@ -177,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Form(
                                   child: TextFormField(
                                 controller: conceptoC,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                     icon: Icon(Icons.message_outlined),
                                     labelText: "concepto",
                                     labelStyle: TextStyle(
@@ -189,10 +188,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 readOnly: true,
                                 controller: Fecha,
                                 onTap: () {
-                                  _seleccionarFecha(context);
+                                  seleccionarFecha(context);
                                   setState(() {});
                                 },
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                     icon: Icon(Icons.date_range),
                                     labelText: "Fecha de transaccion",
                                     labelStyle: TextStyle(
@@ -222,9 +221,220 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   ElevatedButton(
                                     onPressed: () async {
-                                      debugPrint(session?.user?.id.toString());
+                                      final response = await supabase
+                                          .from('transacciones')
+                                          .insert({
+                                        'descripcion': conceptoC.text,
+                                        'fecha': Fecha.text,
+                                        'id_transaccion': 2,
+                                        'id_cuenta': Selectedindex,
+                                        'id_user': session?.user.id,
+                                        'monto': double.parse(montoC.text)
+                                      });
+                                      if (response != true) {
+                                        switch (Selectedindex) {
+                                          case 1:
+                                            ahorro = await buscarAhorro(ID);
+
+                                            break;
+                                          case 2:
+                                            corriente =
+                                                await buscarCorriente(ID);
+
+                                            break;
+                                          case 3:
+                                            efectivo = await buscarEfectivo(ID);
+
+                                            break;
+                                        }
+
+                                        saldo_total = await SaldoTotal(
+                                            efectivo, corriente, ahorro);
+                                        gasto = await buscarEgresos(ID);
+                                        setState(() {
+                                          saldo_total;
+                                          gasto;
+                                        });
+
+                                        montoC.clear();
+                                        // ignore: use_build_context_synchronously
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content: Text(
+                                          'Egresos registrado satisfactoriamente',
+                                          style: TextStyle(fontFamily: fuente),
+                                        )));
+                                        // ignore: use_build_context_synchronously
+                                        Navigator.pop(context);
+                                      } else {
+                                        // ignore: use_build_context_synchronously
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content: Text(
+                                          'A ocurrido un error porfavor intente de nuevo',
+                                          style: TextStyle(fontFamily: fuente),
+                                        )));
+                                      }
+                                    },
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateColor.resolveWith(
+                                      (states) => fondo2,
+                                    )),
+                                    child: const Text("Aceptar",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: letras,
+                                            fontFamily: fuente)),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ));
+                  },
+                );
+              },
+            ),
+            //--------------------------------------------INGRESOS SPEED DIAL-----------------------------
+            SpeedDialChild(
+              backgroundColor: fondo2,
+              child: const Icon(
+                Icons.monetization_on_outlined,
+                color: Colors.green,
+              ),
+              label: 'Ingreso',
+              labelStyle: const TextStyle(color: letras, fontFamily: fuente),
+              labelBackgroundColor: fondo2,
+              onTap: () {
+                showDialog(
+                  barrierColor: fondo,
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                        titlePadding: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.width / 3.20,
+                            top: MediaQuery.of(context).size.height / 22),
+                        title: const Text(
+                          "Ingreso",
+                          style: TextStyle(fontSize: 22, fontFamily: fuente),
+                        ),
+                        backgroundColor: fondo,
+                        content: Container(
+                          width: 300,
+                          height: 400,
+                          decoration: BoxDecoration(
+                              //color: fondo2,
+                              borderRadius: BorderRadius.circular(20)),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Form(
+                                  child: TextFormField(
+                                controller: montoC,
+                                decoration: const InputDecoration(
+                                    icon: Icon(Icons.monetization_on),
+                                    labelText: "Monto",
+                                    labelStyle: TextStyle(
+                                        fontFamily: fuente, fontSize: 18)),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(),
+                                /* inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp("[0-9]"))
+                                ], */
+                              )),
+                              DropdownButtonFormField<String>(
+                                value: Selecteditem,
+                                onChanged: (newvalue) {
+                                  setState(() {
+                                    Selecteditem = newvalue!;
+                                    switch (newvalue) {
+                                      case "":
+                                        Selectedindex = 0;
+                                        break;
+                                      case "Cuenta Ahorro":
+                                        Selectedindex = 1;
+                                        break;
+                                      case "Cuenta Corriente":
+                                        Selectedindex = 2;
+                                        break;
+                                      case "Billetera":
+                                        Selectedindex = 3;
+                                        break;
+                                    }
+                                  });
+                                },
+                                items: <String>[
+                                  "",
+                                  "Cuenta Ahorro",
+                                  "Cuenta Corriente",
+                                  "Billetera"
+                                ].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                decoration: const InputDecoration(
+                                    icon: Icon(
+                                        Icons.account_balance_wallet_outlined),
+                                    labelText: "Seleccione la cuenta",
+                                    labelStyle: TextStyle(
+                                        fontFamily: fuente, fontSize: 18)),
+                              ),
+                              Form(
+                                  child: TextFormField(
+                                controller: conceptoC,
+                                decoration: const InputDecoration(
+                                    icon: Icon(Icons.message_outlined),
+                                    labelText: "concepto",
+                                    labelStyle: TextStyle(
+                                        fontFamily: fuente, fontSize: 18)),
+                                keyboardType: TextInputType.text,
+                              )),
+                              Form(
+                                  child: TextFormField(
+                                readOnly: true,
+                                controller: Fecha,
+                                onTap: () {
+                                  seleccionarFecha(context);
+                                  setState(() {});
+                                },
+                                decoration: const InputDecoration(
+                                    icon: Icon(Icons.date_range),
+                                    labelText: "Fecha de transaccion",
+                                    labelStyle: TextStyle(
+                                        fontFamily: fuente, fontSize: 18)),
+                                keyboardType: TextInputType.datetime,
+                              )),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 20),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      style: ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStateColor.resolveWith(
+                                        (states) => fondo,
+                                      )),
+                                      child: const Text("Cancelar",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: letras,
+                                              fontFamily: fuente)),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      /*  debugPrint(session?.user?.id.toString());
                                       debugPrint(
-                                          session?.user?.email.toString());
+                                          session?.user?.email.toString()); */
                                       final response = await supabase
                                           .from('transacciones')
                                           .insert({
@@ -232,41 +442,63 @@ class _HomeScreenState extends State<HomeScreen> {
                                         'fecha': Fecha.text,
                                         'id_transaccion': 1,
                                         'id_cuenta': Selectedindex,
-                                        'id_user': session?.user?.id,
+                                        'id_user': session?.user.id,
                                         'monto': double.parse(montoC.text)
                                       });
                                       if (response != true) {
+                                        var ahorros = '0.00';
+                                        var corrientes = '0.00';
+                                        var efectivos = '0.00';
+                                        switch (Selectedindex) {
+                                          case 1:
+                                            ahorro = await buscarAhorro(ID);
+
+                                            break;
+                                          case 2:
+                                            corrientes = (double.parse(
+                                                        corriente) +
+                                                    double.parse(montoC.text))
+                                                .toString();
+                                            corriente =
+                                                await buscarCorriente(ID);
+
+                                            break;
+                                          case 3:
+                                            efectivo = await buscarEfectivo(ID);
+
+                                            break;
+                                        }
+
+                                        saldo_total = await SaldoTotal(
+                                            efectivos, corrientes, ahorros);
+                                        ingreso = await buscarIngresos(ID);
+                                        setState(() {
+                                          saldo_total;
+                                          ingreso;
+                                        });
+
+                                        ingreso = (double.parse(ingreso) +
+                                                double.parse(montoC.text))
+                                            .toString();
+                                        montoC.clear();
+                                        // ignore: use_build_context_synchronously
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
+                                            .showSnackBar(const SnackBar(
                                                 content: Text(
                                           'Ingresos registrado satisfactoriamente',
                                           style: TextStyle(fontFamily: fuente),
                                         )));
+                                        // ignore: use_build_context_synchronously
                                         Navigator.pop(context);
                                       } else {
+                                        // ignore: use_build_context_synchronously
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
+                                            .showSnackBar(const SnackBar(
                                                 content: Text(
                                           'A ocurrido un error porfavor intente de nuevo',
                                           style: TextStyle(fontFamily: fuente),
                                         )));
                                       }
-                                      /* final response = await supabase
-                                        .from("tipo transaccion")
-                                        .select("monto")
-                                        .eq("nombre", "Ingreso"); */
-                                      //final xd = int.tryParse( response[0].toString());
-                                      /* final valor = double.parse(
-                                            response[0]['monto'].toString()) +
-                                        double.parse(montoC.text);
-
-                                    final response2 = await supabase
-                                        .from("tipo transaccion")
-                                        .update({'monto': valor}).eq(
-                                            'monto', 'Ingreso'); */
-                                      /* final response = await supabase
-                                        .from("tipo transaccion")
-                                        .select("monto.sum()"); */
                                     },
                                     style: ButtonStyle(
                                         backgroundColor:
@@ -304,24 +536,10 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(right: 20),
               child: Text(
                 fromattedDate,
-                style:
-                    TextStyle(color: letras, fontFamily: fuente, fontSize: 18),
+                style: const TextStyle(
+                    color: letras, fontFamily: fuente, fontSize: 18),
               ),
             ),
-
-            /* 
-          ElevatedButton(
-            onPressed: null,
-            style: ButtonStyle(
-                backgroundColor:
-                    MaterialStateColor.resolveWith((states) => fondo2),
-                side: MaterialStateBorderSide.resolveWith(
-                    (states) => const BorderSide(color: bordes))),
-            child: Text(
-              fromattedDate,
-              style: const TextStyle(color: letras),
-            ),
-          ) */
           ],
         ),
         drawer: Drawer(
@@ -332,35 +550,26 @@ class _HomeScreenState extends State<HomeScreen> {
               const DrawerHeader(
                 decoration: BoxDecoration(color: fondo2),
                 child: Text(
-                  "OPCIONES",
+                  "Opciones",
                   style: TextStyle(color: letras, fontFamily: fuente),
                 ),
               ),
               ListTile(
+                leading: const Icon(Icons.dark_mode_outlined),
                 title: const Text(
-                  "CUENTA CORRIENTE",
+                  "Modo Oscuro",
                   style: TextStyle(color: letras, fontFamily: fuente),
                 ),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
+                  /*Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => const CorrienteScreen(),
-                  ));
+                  ));*/
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.logout),
                 title: const Text(
-                  "CUENTA AHORRO",
-                  style: TextStyle(color: letras, fontFamily: fuente),
-                ),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const AhorroScreen(),
-                  ));
-                },
-              ),
-              ListTile(
-                title: const Text(
-                  "Cerrar sesion",
+                  "Cerrar Sesion",
                   style: TextStyle(color: letras, fontFamily: fuente),
                 ),
                 onTap: () async {
@@ -395,7 +604,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: MediaQuery.of(context).size.width / 1.10,
                     child: Column(
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         Row(
@@ -403,8 +612,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             Padding(
                               padding: EdgeInsets.only(
                                   left: MediaQuery.of(context).size.width / 22),
-                              child: Text(
-                                "Saldo Total ",
+                              child: const Text(
+                                "Saldo Total (Dolares) ",
                                 style: TextStyle(
                                     fontSize: 20,
                                     color: letras,
@@ -422,15 +631,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             Padding(
                               padding: EdgeInsets.only(
                                   left: MediaQuery.of(context).size.width / 18),
-                              child: Text("0.0 ",
-                                  style: TextStyle(
+                              child: Text(saldo_total,
+                                  style: const TextStyle(
                                       fontSize: 24,
                                       color: letras,
                                       fontFamily: fuente)),
                             ),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         Container(
@@ -451,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         left:
                                             MediaQuery.of(context).size.width /
                                                 20),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.arrow_upward_rounded,
                                       color: Colors.green,
                                     ),
@@ -461,7 +670,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         left:
                                             MediaQuery.of(context).size.width /
                                                 22),
-                                    child: Text("Ingresos ",
+                                    child: const Text("Ingresos ",
                                         style: TextStyle(
                                             fontSize: 20,
                                             color: letras,
@@ -472,8 +681,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         left:
                                             MediaQuery.of(context).size.width /
                                                 4),
-                                    child: Text("0.00",
-                                        style: TextStyle(
+                                    child: Text(ingreso,
+                                        style: const TextStyle(
                                             fontSize: 26,
                                             color: Colors.green,
                                             fontFamily: fuente)),
@@ -487,7 +696,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         left:
                                             MediaQuery.of(context).size.width /
                                                 20),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.arrow_downward,
                                       color: Colors.red,
                                     ),
@@ -497,7 +706,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         left:
                                             MediaQuery.of(context).size.width /
                                                 22),
-                                    child: Text("Gastos",
+                                    child: const Text("Gastos",
                                         style: TextStyle(
                                             fontSize: 20,
                                             color: letras,
@@ -508,8 +717,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         left:
                                             MediaQuery.of(context).size.width /
                                                 3.40),
-                                    child: Text("0.00",
-                                        style: TextStyle(
+                                    child: Text(gasto,
+                                        style: const TextStyle(
                                             fontSize: 26,
                                             color: Colors.red,
                                             fontFamily: fuente)),
@@ -521,10 +730,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         //
-                        SizedBox(
+                        const SizedBox(
                           height: 30,
                         ),
-                        Row(
+                        const Row(
                           children: [],
                         ),
                         SizedBox(
@@ -556,7 +765,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.only(
                   top: MediaQuery.of(context).size.height / 18,
                   left: MediaQuery.of(context).size.width / 10),
-              child: Row(
+              child: const Row(
                 children: [
                   Text(
                     "Transacciones",
@@ -570,10 +779,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.only(
                     top: MediaQuery.of(context).size.height / 22),
                 child: StreamBuilder(
-                  stream: _stream,
+                  stream: _stream = supabase
+                      .from('transacciones')
+                      .stream(primaryKey: ['id'])
+                      .eq('id_user', ID)
+                      .order('created_at', ascending: false),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-                      return Center(
+                      return const Center(
                         child: CircularProgressIndicator(),
                       );
                     }
@@ -604,9 +817,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             var montoIngreso = "0.00";
                             var montoEgreso = "0.00";
 
-                            debugPrint(session?.user?.email.toString());
+                            /* debugPrint(session?.user?.email.toString());
+                            debugPrint(ID);
                             debugPrint(
-                                transaccion['id_transaccion'].toString());
+                                transaccion['id_transaccion'].toString()); */
                             if (int.parse(
                                     transaccion['id_transaccion'].toString()) ==
                                 1) {
@@ -631,12 +845,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Row(
                                         children: [
                                           Padding(
-                                            padding: EdgeInsets.only(
+                                            padding: const EdgeInsets.only(
                                               left: 10,
                                             ),
                                             child: Text(
                                               dia[2],
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: letras,
                                                   fontFamily: fuente,
                                                   fontSize: 28),
@@ -653,22 +867,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ), */
 
                                               Padding(
-                                                padding: EdgeInsets.only(
+                                                padding: const EdgeInsets.only(
                                                     left: 10, top: 8),
                                                 child: Text(
                                                   diaNombre,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       color: Colors.grey,
                                                       fontFamily: fuente,
                                                       fontSize: 18),
                                                 ),
                                               ),
                                               Padding(
-                                                padding:
-                                                    EdgeInsets.only(right: 10),
+                                                padding: const EdgeInsets.only(
+                                                    right: 10),
                                                 child: Text(
                                                   mesNombre,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       color: letras,
                                                       fontFamily: fuente,
                                                       fontSize: 18),
@@ -677,11 +891,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ],
                                           ),
                                           Padding(
-                                            padding: EdgeInsets.only(
+                                            padding: const EdgeInsets.only(
                                                 top: 25, left: 1),
                                             child: Text(
                                               dia[0],
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: letras,
                                                   fontFamily: fuente,
                                                   fontSize: 18),
@@ -692,21 +906,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Column(
                                         children: [
                                           Padding(
-                                            padding: EdgeInsets.only(
+                                            padding: const EdgeInsets.only(
                                                 top: 8.5, left: 180),
                                             child: Text(
                                               montoIngreso,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: Colors.green,
                                                   fontFamily: fuente,
                                                   fontSize: 18),
                                             ),
                                           ),
                                           Padding(
-                                            padding: EdgeInsets.only(left: 180),
+                                            padding: const EdgeInsets.only(
+                                                left: 180),
                                             child: Text(
                                               montoEgreso,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: Colors.red,
                                                   fontFamily: fuente,
                                                   fontSize: 18),
@@ -725,23 +940,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-}
-
-class containerIngreso extends StatelessWidget {
-  const containerIngreso({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-        content: Container(
-      width: 200,
-      height: 200,
-      decoration:
-          BoxDecoration(color: fondo2, borderRadius: BorderRadius.circular(20)),
-      child: Text("SIIIIIIII"),
-    ));
   }
 }

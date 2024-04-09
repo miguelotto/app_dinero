@@ -21,8 +21,19 @@ const fuente = "SourceSans";
 final controlerP = TextEditingController();
 final controlerC = TextEditingController();
 //final user = Supabase.instance.client.auth.currentUser;
-final session = Supabase.instance.client.auth.currentSession;
+//final session = Supabase.instance.client.auth.currentSession;
+//final cerrar = Supabase.instance.client.auth.signOut();
 final supabase = Supabase.instance.client;
+// ignore: non_constant_identifier_names
+String ID = "";
+
+var ingreso = "0.00";
+var gasto = "0.00";
+// ignore: non_constant_identifier_names
+var saldo_total = "0.00";
+var efectivo = "0.00";
+var ahorro = "0.00";
+var corriente = "0.00";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,10 +41,11 @@ Future<void> main() async {
       url: 'https://zoqdkwwjmgojdwohhwex.supabase.co',
       anonKey:
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcWRrd3dqbWdvamR3b2hod2V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI0OTgwNjksImV4cCI6MjAyODA3NDA2OX0.gu6mbAotQP8fB_4OrM2tS-jS6iVZ0X0L5QQufklrdK8');
-  runApp(const MaterialApp(
+  runApp(MaterialApp(
     //localizationsDelegates: [GlobalMa],
     title: "Finanzas",
     debugShowCheckedModeBanner: false,
+    theme: ThemeData.light(),
     home: Home(),
   ));
 }
@@ -175,33 +187,158 @@ class Home extends StatelessWidget {
   }
 }
 
-/* 
-void verificar(context) {
-  if (user != null) {
-    debugPrint("id${user!.id}");
-    debugPrint("id${user!.email}");
+Future<String> buscarEgresos(String id) async {
+  final egresos = await supabase
+      .from('transacciones')
+      .select('monto.sum()')
+      .eq('id_transaccion', 2)
+      .eq('id_user', id);
+
+  if (egresos[0]['sum'] != null) {
+    gasto = egresos[0]['sum'].toString();
   } else {
-    debugPrint("Usuario no registrado");
-
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Error al registrar usuario')));
+    gasto = '0.00';
   }
-} */
+  return gasto;
+}
 
+Future<String> buscarIngresos(String id) async {
+  final ingresos = await supabase
+      .from('transacciones')
+      .select('monto.sum()')
+      .eq('id_transaccion', 1)
+      .eq('id_user', id);
+
+  if (ingresos[0]['sum'] != null) {
+    ingreso = ingresos[0]['sum'].toString();
+  } else {
+    ingreso = "0.00";
+  }
+  return ingreso;
+}
+
+Future<String> buscarEfectivo(String id) async {
+  String gastos = "0.00";
+  final efectivos = await supabase
+      .from('transacciones')
+      .select('monto.sum()')
+      .eq('id_transaccion', 1)
+      .eq('id_user', id)
+      .eq('id_cuenta', 3);
+  final efectivosGatos = await supabase
+      .from('transacciones')
+      .select('monto.sum()')
+      .eq('id_transaccion', 2)
+      .eq('id_user', id)
+      .eq('id_cuenta', 3);
+
+  if (efectivos[0]['sum'] != null) {
+    efectivo = efectivos[0]['sum'].toString();
+  } else {
+    efectivo = '0.00';
+  }
+
+  if (efectivosGatos[0]['sum'] != null) {
+    gastos = efectivosGatos[0]['sum'].toString();
+  } else {
+    gastos = '0.00';
+  }
+
+  return (double.parse(efectivo) - double.parse(gastos)).toString();
+}
+
+Future<String> buscarAhorro(String id) async {
+  String gastos = "0.00";
+  // ignore: non_constant_identifier_names
+  final Ahorros = await supabase
+      .from('transacciones')
+      .select('monto.sum()')
+      .eq('id_transaccion', 1)
+      .eq('id_user', id)
+      .eq('id_cuenta', 1);
+  // ignore: non_constant_identifier_names
+  final AhorrosGastos = await supabase
+      .from('transacciones')
+      .select('monto.sum()')
+      .eq('id_transaccion', 2)
+      .eq('id_user', id)
+      .eq('id_cuenta', 1);
+
+  if (Ahorros[0]['sum'] != null) {
+    ahorro = Ahorros[0]['sum'].toString();
+  } else {
+    ahorro = '0.00';
+  }
+  if (AhorrosGastos[0]['sum'] != null) {
+    gastos = AhorrosGastos[0]['sum'].toString();
+  } else {
+    gastos = '0.00';
+  }
+  return (double.parse(ahorro) - double.parse(gastos)).toString();
+}
+
+Future<String> buscarCorriente(String id) async {
+  String gasto = "0.00";
+  // ignore: non_constant_identifier_names
+  final Corriente = await supabase
+      .from('transacciones')
+      .select('monto.sum()')
+      .eq('id_transaccion', 1)
+      .eq('id_user', id)
+      .eq('id_cuenta', 2);
+  // ignore: non_constant_identifier_names
+  final CorrienteGasto = await supabase
+      .from('transacciones')
+      .select('monto.sum()')
+      .eq('id_transaccion', 2)
+      .eq('id_user', id)
+      .eq('id_cuenta', 2);
+
+  if (Corriente[0]['sum'] != null) {
+    corriente = Corriente[0]['sum'].toString();
+  } else {
+    corriente = '0.00';
+  }
+
+  if (CorrienteGasto[0]['sum'] != null) {
+    gasto = CorrienteGasto[0]['sum'].toString();
+  }
+
+  return (double.parse(corriente) - double.parse(gasto)).toString();
+}
+
+// ignore: non_constant_identifier_names
+Future<String> SaldoTotal(
+    String efectivo, String corriente, String ahorro) async {
+  return (double.parse(efectivo) +
+          double.parse(corriente) +
+          double.parse(ahorro))
+      .toString();
+}
+
+late final Future xd;
 void verificar(context, String contra, String correo) async {
-  await supabase.auth.signOut();
-
   try {
     final response =
         await supabase.auth.signInWithPassword(password: contra, email: correo);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         duration: Duration(seconds: 3),
         content: Text(
           'Bienvenido de nuevo',
           style: TextStyle(fontFamily: fuente),
         )));
+    final user = Supabase.instance.client.auth.currentUser;
+    ID = user!.id;
     controlerC.clear();
+
     controlerP.clear();
+
+    ingreso = await buscarIngresos(ID);
+    gasto = await buscarEgresos(ID);
+    efectivo = await buscarEfectivo(ID);
+    ahorro = await buscarAhorro(ID);
+    corriente = await buscarCorriente(ID);
+    saldo_total = await SaldoTotal(efectivo, corriente, ahorro);
 
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -209,7 +346,7 @@ void verificar(context, String contra, String correo) async {
       ),
     );
   } on AuthException catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
       'Datos incorrectos porfavor intente de nuevo',
       style: TextStyle(fontFamily: fuente),
@@ -218,12 +355,12 @@ void verificar(context, String contra, String correo) async {
     debugPrint(e.message);
     debugPrint(e.statusCode);
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
       'Error al Logear usuario',
       style: TextStyle(fontFamily: fuente),
     )));
-    /* debugPrint("error" + e.toString()); */
+    debugPrint("error$e");
   }
 }
 
@@ -231,7 +368,7 @@ Future<void> insertar(String correo, String pin, context) async {
   //final response = await supabase.auth.signUp(password: pin, email: correo);
   try {
     final response = await supabase.auth.signUp(password: pin, email: correo);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
       'Usuario Registrado Exitosamente',
       style: TextStyle(fontFamily: fuente),
@@ -244,7 +381,7 @@ Future<void> insertar(String correo, String pin, context) async {
       ),
     );
   } on AuthException catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
       'Error al registrar usuario, no acceso a la api',
       style: TextStyle(fontFamily: fuente),
@@ -252,18 +389,11 @@ Future<void> insertar(String correo, String pin, context) async {
     debugPrint(e.message);
     debugPrint(e.statusCode);
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
       'Error al registrar usuario',
       style: TextStyle(fontFamily: fuente),
     )));
-    debugPrint("error" + e.toString());
+    debugPrint("error$e");
   }
-  /* if (response != true) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Error al registrar usuario')));
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Usuario registrado exitosamente')));
-  } */
 }

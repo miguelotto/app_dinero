@@ -1,6 +1,7 @@
 import 'package:Gestion_de_Finanzas/main.dart';
 import 'package:flutter/material.dart';
 
+TextEditingController controlM = TextEditingController();
 void main() => runApp(const MaterialApp(title: "Accounts", home: MyApp()));
 
 class MyApp extends StatelessWidget {
@@ -8,10 +9,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return accounts();
+    return const accounts();
   }
 }
 
+// ignore: camel_case_types
 class accounts extends StatefulWidget {
   const accounts({super.key});
 
@@ -19,13 +21,14 @@ class accounts extends StatefulWidget {
   State<accounts> createState() => _accountsState();
 }
 
+// ignore: camel_case_types
 class _accountsState extends State<accounts> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
       appBar: AppBar(
-        actions: [
+        actions: const [
           /*      ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
@@ -54,7 +57,7 @@ class _accountsState extends State<accounts> {
                 padding: EdgeInsets.only(
                     top: MediaQuery.of(context).size.height / 30,
                     left: MediaQuery.of(context).size.width / 10),
-                child: Text(
+                child: const Text(
                   "Saldo Total ",
                   style: TextStyle(
                       fontSize: 18, color: letras, fontFamily: fuente),
@@ -69,8 +72,8 @@ class _accountsState extends State<accounts> {
                 padding: EdgeInsets.only(
                     left: MediaQuery.of(context).size.width / 10),
                 child: Text(
-                  "0.00",
-                  style: TextStyle(
+                  saldo_total,
+                  style: const TextStyle(
                       fontSize: 22, color: letras, fontFamily: fuente),
                 ),
               ),
@@ -91,10 +94,10 @@ class _accountsState extends State<accounts> {
                   width: MediaQuery.of(context).size.width / 1.10,
                   child: Column(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Row(
@@ -102,16 +105,16 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 10),
-                            child: Icon(
+                            child: const Icon(
                               size: 35,
-                              Icons.money,
+                              Icons.account_balance_wallet_rounded,
                               color: Colors.green,
                             ),
                           ),
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 24),
-                            child: Text("Dinero en Efectivo",
+                            child: const Text("Dinero en Efectivo",
                                 style: TextStyle(
                                     fontSize: 18,
                                     color: letras,
@@ -128,10 +131,10 @@ class _accountsState extends State<accounts> {
                           ), */
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 15,
                       ),
-                      Row(
+                      const Row(
                         children: [],
                       ),
                       Row(
@@ -139,7 +142,7 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 10),
-                            child: Text("Saldo",
+                            child: const Text("Saldo",
                                 style: TextStyle(
                                     fontSize: 18,
                                     color: letras,
@@ -148,18 +151,18 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 2),
-                            child: Text("0.00",
-                                style: TextStyle(
+                            child: Text(efectivo,
+                                style: const TextStyle(
                                     fontSize: 20,
                                     color: letras,
                                     fontFamily: fuente)),
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
-                      Row(
+                      const Row(
                         children: [],
                       ),
                       SizedBox(
@@ -188,7 +191,7 @@ class _accountsState extends State<accounts> {
             ],
           ),
           // Container de Cuenta corriente------------------------------------------
-          Row(
+          const Row(
             children: [],
           ),
           Row(
@@ -206,10 +209,10 @@ class _accountsState extends State<accounts> {
                   width: MediaQuery.of(context).size.width / 1.10,
                   child: Column(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Row(
@@ -217,16 +220,16 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 10),
-                            child: Icon(
+                            child: const Icon(
                               size: 35,
-                              Icons.balance,
-                              color: Colors.yellow,
+                              Icons.account_balance_outlined,
+                              color: Colors.black,
                             ),
                           ),
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 24),
-                            child: Text("Banco",
+                            child: const Text("Banco",
                                 style: TextStyle(
                                     fontSize: 18,
                                     color: letras,
@@ -235,7 +238,7 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 40),
-                            child: Text("(Cuenta corriente)",
+                            child: const Text("(Cuenta corriente)",
                                 style: TextStyle(
                                     fontSize: 16,
                                     color: letras,
@@ -243,10 +246,10 @@ class _accountsState extends State<accounts> {
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 15,
                       ),
-                      Row(
+                      const Row(
                         children: [],
                       ),
                       Row(
@@ -254,7 +257,7 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 10),
-                            child: Text("Saldo",
+                            child: const Text("Saldo",
                                 style: TextStyle(
                                     fontSize: 18,
                                     color: letras,
@@ -263,27 +266,131 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 2),
-                            child: Text("0.00",
-                                style: TextStyle(
+                            child: Text(corriente,
+                                style: const TextStyle(
                                     fontSize: 20,
                                     color: letras,
                                     fontFamily: fuente)),
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
-                      Row(
+                      const Row(
                         children: [],
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width / 1.20,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const accounts(),
-                            ));
+                            showDialog(
+                              barrierColor: fondo,
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (context) {
+                                return SizedBox(
+                                  height: 70,
+                                  child: AlertDialog(
+                                    backgroundColor: Colors.grey[300],
+                                    title: const Text(
+                                      "Editar",
+                                      style: TextStyle(
+                                          color: letras,
+                                          fontFamily: fuente,
+                                          fontSize: 18),
+                                    ),
+                                    content: Container(
+                                      width: 270,
+                                      height: 180,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Form(
+                                              child: TextFormField(
+                                            controller: controlM,
+                                            decoration: const InputDecoration(
+                                                icon:
+                                                    Icon(Icons.monetization_on),
+                                                labelText: "Monto",
+                                                labelStyle: TextStyle(
+                                                    fontFamily: fuente,
+                                                    fontSize: 18)),
+                                            keyboardType: const TextInputType
+                                                .numberWithOptions(),
+                                            /* inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                          RegExp("[0-9]"))
+                                                                        ], */
+                                          )),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 10),
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  style: ButtonStyle(
+                                                      backgroundColor:
+                                                          MaterialStateColor
+                                                              .resolveWith(
+                                                    (states) => fondo,
+                                                  )),
+                                                  child: const Text("Cancelar",
+                                                      style: TextStyle(
+                                                          fontSize: 16,
+                                                          color: letras,
+                                                          fontFamily: fuente)),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 20),
+                                                child: SizedBox(
+                                                  width: 100,
+                                                  child: ElevatedButton(
+                                                    onPressed: () async {
+                                                      controlM.text;
+                                                      /*                    final response = await supabase
+                                          .from('transacciones')
+                                          .insert({
+                                        'descripcion': conceptoC.text,
+                                        'fecha': Fecha.text,
+                                        'id_transaccion': 2,
+                                        'id_cuenta': Selectedindex,
+                                        'id_user': session?.user.id,
+                                        'monto': double.parse(montoC.text)
+                                      }); */
+                                                    },
+                                                    style: ButtonStyle(
+                                                        backgroundColor:
+                                                            MaterialStateColor
+                                                                .resolveWith(
+                                                      (states) => fondo2,
+                                                    )),
+                                                    child: const Text("Aceptar",
+                                                        style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: letras,
+                                                            fontFamily:
+                                                                fuente)),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
                           },
                           style: ButtonStyle(
                               backgroundColor: MaterialStateColor.resolveWith(
@@ -304,7 +411,7 @@ class _accountsState extends State<accounts> {
           ),
 
           // Container de Cuenta Ahorro------------------------------------------
-          Row(
+          const Row(
             children: [],
           ),
           Row(
@@ -322,10 +429,10 @@ class _accountsState extends State<accounts> {
                   width: MediaQuery.of(context).size.width / 1.10,
                   child: Column(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Row(
@@ -333,9 +440,9 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 10),
-                            child: Icon(
+                            child: const Icon(
                               size: 35,
-                              Icons.balance,
+                              Icons.account_balance,
                               color: Colors.blue,
                             ),
                           ),
@@ -379,7 +486,7 @@ class _accountsState extends State<accounts> {
                           Padding(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).size.width / 2),
-                            child: Text("0.00",
+                            child: Text(ahorro,
                                 style: TextStyle(
                                     fontSize: 20,
                                     color: letras,
