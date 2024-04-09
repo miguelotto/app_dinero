@@ -235,15 +235,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                         switch (Selectedindex) {
                                           case 1:
                                             ahorro = await buscarAhorro(ID);
+                                            ahorro = (double.parse(ahorro) -
+                                                    double.parse(montoC.text))
+                                                .toString();
 
                                             break;
                                           case 2:
                                             corriente =
                                                 await buscarCorriente(ID);
+                                            corriente = (double.parse(
+                                                        corriente) -
+                                                    double.parse(montoC.text))
+                                                .toString();
 
                                             break;
                                           case 3:
                                             efectivo = await buscarEfectivo(ID);
+                                            efectivo = (double.parse(efectivo) -
+                                                    double.parse(montoC.text))
+                                                .toString();
 
                                             break;
                                         }
@@ -451,35 +461,44 @@ class _HomeScreenState extends State<HomeScreen> {
                                         var efectivos = '0.00';
                                         switch (Selectedindex) {
                                           case 1:
+                                            ahorros = (double.parse(ahorro) +
+                                                    double.parse(montoC.text))
+                                                .toString();
                                             ahorro = await buscarAhorro(ID);
 
                                             break;
                                           case 2:
+                                            corriente =
+                                                await buscarCorriente(ID);
                                             corrientes = (double.parse(
                                                         corriente) +
                                                     double.parse(montoC.text))
                                                 .toString();
-                                            corriente =
-                                                await buscarCorriente(ID);
 
                                             break;
                                           case 3:
                                             efectivo = await buscarEfectivo(ID);
+                                            efectivos = (double.parse(
+                                                        efectivo) +
+                                                    double.parse(montoC.text))
+                                                .toString();
 
                                             break;
                                         }
+                                        final ingresos;
 
                                         saldo_total = await SaldoTotal(
                                             efectivos, corrientes, ahorros);
-                                        ingreso = await buscarIngresos(ID);
+                                        ingresos = await buscarIngresos(ID);
+                                        ingreso = (double.parse(ingresos) +
+                                                double.parse(montoC.text))
+                                            .toString();
+
                                         setState(() {
                                           saldo_total;
                                           ingreso;
                                         });
 
-                                        ingreso = (double.parse(ingreso) +
-                                                double.parse(montoC.text))
-                                            .toString();
                                         montoC.clear();
                                         // ignore: use_build_context_synchronously
                                         ScaffoldMessenger.of(context)

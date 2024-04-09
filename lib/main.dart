@@ -46,7 +46,7 @@ Future<void> main() async {
     title: "Finanzas",
     debugShowCheckedModeBanner: false,
     theme: ThemeData.light(),
-    home: Home(),
+    home: const Home(),
   ));
 }
 
@@ -302,6 +302,8 @@ Future<String> buscarCorriente(String id) async {
 
   if (CorrienteGasto[0]['sum'] != null) {
     gasto = CorrienteGasto[0]['sum'].toString();
+  } else {
+    gasto = '0.00';
   }
 
   return (double.parse(corriente) - double.parse(gasto)).toString();
