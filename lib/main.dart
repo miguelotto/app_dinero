@@ -218,7 +218,20 @@ Future<String> buscarIngresos(String id) async {
 }
 
 Future<String> buscarEfectivo(String id) async {
-  String gastos = "0.00";
+  final response = await supabase
+      .from("cuentas")
+      .select('saldo')
+      .eq('id_usuario', id)
+      .eq('id_cuenta', 3);
+  if (response.isEmpty) {
+    final response2 = await supabase
+        .from('cuentas')
+        .insert({'id_usuario': id, 'id_cuenta': 3, 'saldo': 0.00});
+    return "0.00";
+  } else {
+    return response[0]['saldo'].toString();
+  }
+  /*  String gastos = "0.00";
   final efectivos = await supabase
       .from('transacciones')
       .select('monto.sum()')
@@ -244,11 +257,25 @@ Future<String> buscarEfectivo(String id) async {
     gastos = '0.00';
   }
 
-  return (double.parse(efectivo) - double.parse(gastos)).toString();
+  return (double.parse(efectivo) - double.parse(gastos)).toString(); */
 }
 
 Future<String> buscarAhorro(String id) async {
-  String gastos = "0.00";
+  final response = await supabase
+      .from("cuentas")
+      .select('saldo')
+      .eq('id_usuario', id)
+      .eq('id_cuenta', 1);
+  if (response.isEmpty) {
+    final response2 = await supabase
+        .from('cuentas')
+        .insert({'id_usuario': id, 'id_cuenta': 1, 'saldo': 0.00});
+    return "0.00";
+  } else {
+    return response[0]['saldo'].toString();
+  }
+
+  /* String gastos = "0.00";
   // ignore: non_constant_identifier_names
   final Ahorros = await supabase
       .from('transacciones')
@@ -274,11 +301,26 @@ Future<String> buscarAhorro(String id) async {
   } else {
     gastos = '0.00';
   }
-  return (double.parse(ahorro) - double.parse(gastos)).toString();
+  return (double.parse(ahorro) - double.parse(gastos)).toString(); */
 }
 
 Future<String> buscarCorriente(String id) async {
-  String gasto = "0.00";
+  final response = await supabase
+      .from("cuentas")
+      .select('saldo')
+      .eq('id_usuario', id)
+      .eq('id_cuenta', 2);
+  if (response.isEmpty) {
+    final response2 = await supabase
+        .from('cuentas')
+        .insert({'id_usuario': id, 'id_cuenta': 2, 'saldo': 0.00});
+
+    return "0.00";
+  } else {
+    return response[0]['saldo'].toString();
+  }
+
+  /* String gasto = "0.00";
   // ignore: non_constant_identifier_names
   final Corriente = await supabase
       .from('transacciones')
@@ -306,16 +348,17 @@ Future<String> buscarCorriente(String id) async {
     gasto = '0.00';
   }
 
-  return (double.parse(corriente) - double.parse(gasto)).toString();
+  return (double.parse(corriente) - double.parse(gasto)).toString(); */
 }
 
 // ignore: non_constant_identifier_names
-Future<String> SaldoTotal(
-    String efectivo, String corriente, String ahorro) async {
-  return (double.parse(efectivo) +
-          double.parse(corriente) +
-          double.parse(ahorro))
-      .toString();
+Future<String> SaldoTotal(String id_usuario) async {
+  final xd = await supabase
+      .from("cuentas")
+      .select('saldo.sum()')
+      .eq('id_usuario', id_usuario);
+
+  return xd[0]['sum'].toString();
 }
 
 late final Future xd;
@@ -334,13 +377,14 @@ void verificar(context, String contra, String correo) async {
     controlerC.clear();
 
     controlerP.clear();
+    final sesionUsuario = supabase.auth.currentSession;
 
     ingreso = await buscarIngresos(ID);
     gasto = await buscarEgresos(ID);
     efectivo = await buscarEfectivo(ID);
     ahorro = await buscarAhorro(ID);
     corriente = await buscarCorriente(ID);
-    saldo_total = await SaldoTotal(efectivo, corriente, ahorro);
+    saldo_total = await SaldoTotal(ID);
 
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -377,6 +421,9 @@ Future<void> insertar(String correo, String pin, context) async {
     )));
     controlerC.clear();
     controlerP.clear();
+    final insercion =
+        await supabase.from("monto total").insert({"monto": 0.00});
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const Home(),

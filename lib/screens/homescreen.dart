@@ -49,6 +49,15 @@ class _HomeScreenState extends State<HomeScreen> {
     TextEditingController Fecha = TextEditingController();
     TextEditingController montoC = TextEditingController();
     TextEditingController conceptoC = TextEditingController();
+    Future<void> _mostrar() async {
+      final response = await supabase
+          .from("cuentas")
+          .select('saldo.sum()')
+          .eq('id_usuario', session!.user.id);
+      setState(() {
+        saldo_total = response[0]['saldo'];
+      });
+    }
 
     Future<void> seleccionarFecha(BuildContext context) async {
       final DateTime? pick = await showDatePicker(
@@ -69,6 +78,57 @@ class _HomeScreenState extends State<HomeScreen> {
     void initState() {
       super.initState();
       setState(() {});
+    }
+
+    Future<void> restarcuenta() async {
+      final monto_cuenta = await supabase
+          .from('cuentas')
+          .select('saldo')
+          .eq(
+            'id_usuario',
+            session!.user.id,
+          )
+          .eq("id_cuenta", Selectedindex);
+      if (monto_cuenta.isEmpty) {
+        final cuentas = await supabase.from('cuentas').insert({
+          'id_usuario': session.user.id,
+          'id_cuenta': Selectedindex,
+          'saldo': double.parse(montoC.text)
+        });
+      } else {
+        double montoAnterior =
+            double.parse(monto_cuenta[0]['saldo'].toString()) -
+                double.parse(montoC.text);
+        debugPrint(montoAnterior.toString() + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        final cuentas = await supabase
+            .from('cuentas')
+            .update({'saldo': montoAnterior})
+            .eq('id_usuario', session!.user.id)
+            .eq("id_cuenta", Selectedindex);
+      }
+    }
+
+    Future<void> sumarcuenta() async {
+      final monto_cuenta = await supabase
+          .from('cuentas')
+          .select('saldo')
+          .eq('id_usuario', session!.user.id);
+      if (monto_cuenta.isEmpty) {
+        final cuentas = await supabase.from('cuentas').upsert({
+          'id_usuario': session.user.id,
+          'id_cuenta': Selectedindex,
+          'saldo': double.parse(montoC.text)
+        });
+      } else {
+        double montoAnterior =
+            double.parse(monto_cuenta[0]['saldo'].toString()) +
+                double.parse(montoC.text);
+        final cuentas = await supabase
+            .from('cuentas')
+            .update({'saldo': montoAnterior})
+            .eq('id_usuario', session!.user.id)
+            .eq("id_cuenta", Selectedindex);
+      }
     }
 
     final _stream;
@@ -231,39 +291,53 @@ class _HomeScreenState extends State<HomeScreen> {
                                         'id_user': session?.user.id,
                                         'monto': double.parse(montoC.text)
                                       });
+
                                       if (response != true) {
+                                        await restarcuenta();
+
+                                        //por aqui voy no terinado
                                         switch (Selectedindex) {
                                           case 1:
-                                            ahorro = await buscarAhorro(ID);
-                                            ahorro = (double.parse(ahorro) -
-                                                    double.parse(montoC.text))
-                                                .toString();
+                                            final response = await supabase
+                                                .from("cuentas")
+                                                .select("saldo")
+                                                .eq("id_usuario",
+                                                    session!.user.id)
+                                                .eq("id_cuenta", 1);
+                                            ahorro =
+                                                response[0]['saldo'].toString();
 
                                             break;
                                           case 2:
-                                            corriente =
-                                                await buscarCorriente(ID);
-                                            corriente = (double.parse(
-                                                        corriente) -
-                                                    double.parse(montoC.text))
-                                                .toString();
+                                            final response = await supabase
+                                                .from("cuentas")
+                                                .select("saldo")
+                                                .eq("id_usuario",
+                                                    session!.user.id)
+                                                .eq("id_cuenta", 2);
+                                            corriente = response[0]['saldo'];
 
                                             break;
                                           case 3:
-                                            efectivo = await buscarEfectivo(ID);
-                                            efectivo = (double.parse(efectivo) -
-                                                    double.parse(montoC.text))
-                                                .toString();
+                                            final response = await supabase
+                                                .from("cuentas")
+                                                .select("saldo")
+                                                .eq("id_usuario",
+                                                    session!.user.id)
+                                                .eq("id_cuenta", 3);
+                                            efectivo = response[0]['saldo'];
 
                                             break;
                                         }
 
-                                        saldo_total = await SaldoTotal(
-                                            efectivo, corriente, ahorro);
+                                        saldo_total = await SaldoTotal(ID);
                                         gasto = await buscarEgresos(ID);
                                         setState(() {
                                           saldo_total;
                                           gasto;
+                                          efectivo;
+                                          corriente;
+                                          ahorro;
                                         });
 
                                         montoC.clear();
@@ -455,48 +529,59 @@ class _HomeScreenState extends State<HomeScreen> {
                                         'id_user': session?.user.id,
                                         'monto': double.parse(montoC.text)
                                       });
+                                      //por aqui voy
+                                      sumarcuenta();
+
                                       if (response != true) {
-                                        var ahorros = '0.00';
-                                        var corrientes = '0.00';
-                                        var efectivos = '0.00';
                                         switch (Selectedindex) {
                                           case 1:
-                                            ahorros = (double.parse(ahorro) +
-                                                    double.parse(montoC.text))
-                                                .toString();
-                                            ahorro = await buscarAhorro(ID);
+                                            final response = await supabase
+                                                .from("cuentas")
+                                                .select("saldo")
+                                                .eq("id_usuario",
+                                                    session!.user.id)
+                                                .eq("id_cuenta", 1);
+                                            ahorro =
+                                                response[0]["saldo"].toString();
 
                                             break;
                                           case 2:
+                                            final response = await supabase
+                                                .from("cuentas")
+                                                .select("saldo")
+                                                .eq("id_usuario",
+                                                    session!.user.id)
+                                                .eq("id_cuenta", 2);
                                             corriente =
-                                                await buscarCorriente(ID);
-                                            corrientes = (double.parse(
-                                                        corriente) +
-                                                    double.parse(montoC.text))
-                                                .toString();
+                                                response[0]["saldo"].toString();
 
                                             break;
                                           case 3:
-                                            efectivo = await buscarEfectivo(ID);
-                                            efectivos = (double.parse(
-                                                        efectivo) +
-                                                    double.parse(montoC.text))
-                                                .toString();
+                                            final response = await supabase
+                                                .from("cuentas")
+                                                .select("saldo")
+                                                .eq("id_usuario",
+                                                    session!.user.id)
+                                                .eq("id_cuenta", 3);
+                                            efectivo =
+                                                response[0]["saldo"].toString();
 
                                             break;
                                         }
                                         final ingresos;
 
-                                        saldo_total = await SaldoTotal(
-                                            efectivos, corrientes, ahorros);
+                                        saldo_total = await SaldoTotal(ID);
                                         ingresos = await buscarIngresos(ID);
-                                        ingreso = (double.parse(ingresos) +
+                                        /*        ingreso = (double.parse(ingresos) +
                                                 double.parse(montoC.text))
-                                            .toString();
+                                            .toString(); */
 
                                         setState(() {
                                           saldo_total;
-                                          ingreso;
+                                          ingresos;
+                                          efectivo;
+                                          ahorro;
+                                          corriente;
                                         });
 
                                         montoC.clear();
